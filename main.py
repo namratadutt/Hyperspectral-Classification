@@ -1,5 +1,5 @@
 # Import libraries
-import os, sys
+import os, sys, time, math
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -19,6 +19,7 @@ from keras.layers import BatchNormalization
 
 # Get path to your current directory
 basedir = os.getcwd()
+
 
 # Path to your dataset
 filename = basedir + "/hyperSpec.mat"
@@ -42,7 +43,6 @@ truth = truth[-1]
 
 print(truth.shape)
 
-# Reshape hyperspectral data
 hyper = hyper.reshape(325*220, 64)
 truth = truth.flatten()
 
@@ -51,12 +51,12 @@ indx, = np.where(truth >= 0)
 hyper = hyper[indx]
 truth = truth[indx]
 
-# Split data into train and test
-X_train, X_test, y_train, y_test = train_test_split(hyper, truth, test_size= 0.3)
+# # Split data into train and test
+X_train, X_test, y_train, y_test = train_test_split(hyper, truth, test_size= 0.3, random_state = int(time.time()), shuffle = True)
 
-np.savez_compressed(basedir +"/train_test_split_hsi.npz", X_train = X_train, X_test = X_test, y_train = y_train, y_test = y_test)
+np.savez_compressed(basedir +"/train_test_split_hsi_iter1.npz", X_train = X_train, X_test = X_test, y_train = y_train, y_test = y_test)
 
-file = np.load(basedir+"/train_test_split_hsi.npz")
+file = np.load(basedir+"/train_test_split_hsi_iter1.npz")
 X_train = file['X_train']
 X_test = file['X_test']
 y_train = file['y_train']
@@ -96,7 +96,6 @@ acc = np.round(acc, 4) * 100
    
 print("Accuracy: ", acc)
 
-# Compute Confusion matrix
 class_names = ['Trees', 'Mostly grass', 'Mixed ground', 'Dirt and sand', 'road', 'water', 'building shadow', 'building', 'sidewalk', 'yellow curb', 'cloth panels']
 
 cm = confusion_matrix(y_test, y_pred, normalize= 'true')
